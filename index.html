@@ -1,45 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Global Visitors</title>
+  <title>Live Visitor Globe | kcreations681-cpu</title>
   <script src="//unpkg.com/globe.gl"></script>
   <style>
-    body { margin: 0; background: #000; overflow: hidden; }
+    body { 
+      margin: 0; 
+      background: #000; 
+      overflow: hidden; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
     #globeViz { width: 100vw; height: 100vh; }
-    .title { position: absolute; top: 20px; left: 20px; color: white; font-family: sans-serif; z-index: 10; }
+    .title-card { 
+      position: absolute; 
+      top: 20px; 
+      left: 20px; 
+      color: white; 
+      z-index: 10; 
+      background: rgba(0, 0, 0, 0.6);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      pointer-events: none;
+    }
+    h1 { margin: 0; font-size: 24px; color: #00d2ff; }
+    p { margin: 5px 0 0; font-size: 14px; opacity: 0.8; }
   </style>
 </head>
 <body>
-  <div class="title">
+
+  <div class="title-card">
     <h1>Live Visitor Globe</h1>
-    <p>Visualizing where the world meets my code.</p>
+    <p>Welcome! Detecting your location...</p>
   </div>
+
   <div id="globeViz"></div>
 
   <script>
-    // Example Data: This is where we put your "visitor" locations
-    // Later, you can automate this with an API!
-    const myData = [
-      { lat: 6.9271, lng: 79.8612, name: "Sri Lanka", size: 0.5, color: 'red' },
-      { lat: 40.7128, lng: -74.0060, name: "New York", size: 0.3, color: 'blue' },
-      { lat: 51.5074, lng: -0.1278, name: "London", size: 0.3, color: 'green' },
-      { lat: 35.6762, lng: 139.6503, name: "Tokyo", size: 0.4, color: 'purple' }
-    ];
-
+    // Initialize the Globe
     const world = Globe()
       (document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-      .pointsData(myData)
-      .pointAltitude('size')
-      .pointColor('color')
-      .pointLabel('name')
-      (document.getElementById('globeViz'));
+      
+      // Ring (Ripple) Animation Settings
+      .ringColor(() => '#ff4757')
+      .ringMaxRadius(5)
+      .ringPropagationSpeed(2)
+      .ringRepeatPeriod(800)
+      
+      // Auto-rotation
+      .controls().autoRotate = true;
+      world.controls().autoRotateSpeed = 0.5;
 
-    // Make the globe rotate automatically
-    world.controls().autoRotate = true;
-    world.controls().autoRotateSpeed = 0.5;
+    // API Logic: Fetch Visitor Location
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        const { latitude, longitude, city, country_name } = data;
+        
+        // Update the text on screen
+        document.querySelector('p').innerHTML = `Hello from <b>${city}, ${country_name}</b>! ✨`;
+
+        // Add the visitor's location as a ring
+        const visitorData = [{ lat: latitude, lng: longitude }];
+        world.ringsData(visitorData);
+        
+        // Fly the camera to the visitor's location
+        setTimeout(() => {
+          world.pointOfView({ lat: latitude, lng: longitude, altitude: 1.5 }, 2000);
+        }, 1000);
+      })
+      .catch(err => {
+        console.log("Location error:", err);
+        // Fallback data if API fails
+        world.ringsData([{ lat: 6.9271, lng: 79.8612 }]); 
+      });
   </script>
 </body>
 </html>
