@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Global Visitors</title>
+  <script src="//unpkg.com/globe.gl"></script>
+  <style>
+    body { margin: 0; background: #000; overflow: hidden; }
+    #globeViz { width: 100vw; height: 100vh; }
+    .title { position: absolute; top: 20px; left: 20px; color: white; font-family: sans-serif; z-index: 10; }
+  </style>
+</head>
+<body>
+  <div class="title">
+    <h1>Live Visitor Globe</h1>
+    <p>Visualizing where the world meets my code.</p>
+  </div>
+  <div id="globeViz"></div>
+
+  <script>
+    // Example Data: This is where we put your "visitor" locations
+    // Later, you can automate this with an API!
+    const myData = [
+      { lat: 6.9271, lng: 79.8612, name: "Sri Lanka", size: 0.5, color: 'red' },
+      { lat: 40.7128, lng: -74.0060, name: "New York", size: 0.3, color: 'blue' },
+      { lat: 51.5074, lng: -0.1278, name: "London", size: 0.3, color: 'green' },
+      { lat: 35.6762, lng: 139.6503, name: "Tokyo", size: 0.4, color: 'purple' }
+    ];
+
+    const world = Globe()
+      (document.getElementById('globeViz'))
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+      .pointsData(myData)
+      .pointAltitude('size')
+      .pointColor('color')
+      .pointLabel('name')
+      (document.getElementById('globeViz'));
+
+    // Make the globe rotate automatically
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 0.5;
+  </script>
+</body>
+</html>
