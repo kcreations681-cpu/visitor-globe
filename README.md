@@ -31,7 +31,7 @@ Animation: A CSS-driven ripple effect is triggered at the visitor's location, an
 
 📈 View My Globe
 You can interact with the live project here:
-👉 Launch Visitor Globe
+👉 [Launch Visitor Globe](https://kcreations681-cpu.github.io/visitor-globe/)
 
 👨‍💻 About Me
 I'm a developer passionate about merging data with beautiful visualizations. Check out my other projects on my Main Profile.
