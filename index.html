@@ -1,89 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Live Visitor Globe | kcreations681-cpu</title>
+  <title>Laser Visitor Globe</title>
   <script src="//unpkg.com/globe.gl"></script>
   <style>
-    body { 
-      margin: 0; 
-      background: #000; 
-      overflow: hidden; 
-      font-family: 'Segoe UI', sans-serif;
-    }
+    body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
     #globeViz { width: 100vw; height: 100vh; }
     .title-card { 
-      position: absolute; 
-      top: 20px; 
-      left: 20px; 
-      color: white; 
-      z-index: 10; 
-      background: rgba(0, 0, 0, 0.7);
-      padding: 15px;
-      border-radius: 10px;
-      border: 1px solid #444;
-      pointer-events: none;
+      position: absolute; top: 20px; left: 20px; color: white; z-index: 10; 
+      background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 10px; border: 1px solid #ff4757;
     }
-    h1 { margin: 0; font-size: 22px; color: #ff4757; }
-    p { margin: 5px 0 0; font-size: 14px; color: #eee; }
+    h1 { margin: 0; font-size: 22px; color: #ff4757; text-shadow: 0 0 10px #ff4757; }
   </style>
 </head>
 <body>
 
   <div class="title-card">
-    <h1>Live Visitor Globe</h1>
-    <p id="status">Detecting your location...</p>
+    <h1>Location Active</h1>
+    <p id="status">Scanning for Visitors...</p>
   </div>
 
   <div id="globeViz"></div>
 
   <script>
-    // 1. Initialize the Globe with specific "Beacon" settings
     const world = Globe()(document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       
-      // Beacon (Ring) Visuals
-      .ringColor(() => '#ff4757')  // Bright Red pulses
-      .ringMaxRadius(12)           // Size of the pulse
-      .ringPropagationSpeed(3)     // Speed of the pulse
-      .ringRepeatPeriod(500)       // Frequency (lower is faster)
+      // --- LASER BEAM SETTINGS ---
+      .pointColor(() => '#ff4757')
+      .pointAltitude(0.5)          // This makes the "Beam" tall
+      .pointRadius(0.5)            // Thickness of the beam
+      
+      // --- RING PULSE SETTINGS ---
+      .ringColor(() => '#ff4757')
+      .ringMaxRadius(15)
+      .ringPropagationSpeed(4)
+      .ringRepeatPeriod(400)
       
       .controls().autoRotate = true;
-      world.controls().autoRotateSpeed = 0.5;
+      world.controls().autoRotateSpeed = 1.0;
 
-    // 2. Define our Beacons
-    // We start with a permanent one for Sri Lanka
-    const beacons = [
-      { lat: 6.9271, lng: 79.8612, name: 'Home Base' }
-    ];
+    // Start with the Home Laser in Sri Lanka
+    let locations = [{ lat: 6.9271, lng: 79.8612, name: 'HOME' }];
     
-    // Apply the home beacon immediately
-    world.ringsData(beacons);
+    // Show the lasers and rings immediately
+    world.pointsData(locations);
+    world.ringsData(locations);
 
-    // 3. Fetch Visitor Location and add a second Beacon
+    // Find Visitor and add their Laser
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
-        const { latitude, longitude, city, country_name } = data;
-        
-        // Update the UI text
-        document.getElementById('status').innerHTML = `Hello from <b>${city}, ${country_name}</b>! ✨`;
+        const { latitude, longitude, city } = data;
+        document.getElementById('status').innerHTML = `LASER LOCKED: ${city.toUpperCase()}`;
 
-        // Add visitor location to our beacons list
-        beacons.push({ lat: latitude, lng: longitude, name: 'Visitor' });
+        locations.push({ lat: latitude, lng: longitude, name: 'VISITOR' });
         
-        // Update the globe with all beacons
-        world.ringsData(beacons);
+        // Update both Lasers and Rings
+        world.pointsData(locations);
+        world.ringsData(locations);
         
-        // Fly the camera to the new visitor
+        // Fly to the new Laser Beam
         setTimeout(() => {
           world.pointOfView({ lat: latitude, lng: longitude, altitude: 1.8 }, 2000);
-        }, 1200);
-      })
-      .catch(err => {
-        console.log("Location detection failed, showing default beacons.");
-        document.getElementById('status').innerText = "Welcome to my globe!";
+        }, 1000);
       });
   </script>
 </body>
