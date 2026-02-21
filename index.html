@@ -8,7 +8,7 @@
       margin: 0; 
       background: #000; 
       overflow: hidden; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
     }
     #globeViz { width: 100vw; height: 100vh; }
     .title-card { 
@@ -17,65 +17,73 @@
       left: 20px; 
       color: white; 
       z-index: 10; 
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       padding: 15px;
       border-radius: 10px;
       border: 1px solid #444;
       pointer-events: none;
     }
-    h1 { margin: 0; font-size: 24px; color: #00d2ff; }
-    p { margin: 5px 0 0; font-size: 14px; opacity: 0.8; }
+    h1 { margin: 0; font-size: 22px; color: #ff4757; }
+    p { margin: 5px 0 0; font-size: 14px; color: #eee; }
   </style>
 </head>
 <body>
 
   <div class="title-card">
     <h1>Live Visitor Globe</h1>
-    <p>Welcome! Detecting your location...</p>
+    <p id="status">Detecting your location...</p>
   </div>
 
   <div id="globeViz"></div>
 
   <script>
-    // Initialize the Globe
-    const world = Globe()
-      (document.getElementById('globeViz'))
+    // 1. Initialize the Globe with specific "Beacon" settings
+    const world = Globe()(document.getElementById('globeViz'))
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       
-      // Ring (Ripple) Animation Settings
-      .ringColor(() => '#ff4757')
-      .ringMaxRadius(5)
-      .ringPropagationSpeed(2)
-      .ringRepeatPeriod(800)
+      // Beacon (Ring) Visuals
+      .ringColor(() => '#ff4757')  // Bright Red pulses
+      .ringMaxRadius(12)           // Size of the pulse
+      .ringPropagationSpeed(3)     // Speed of the pulse
+      .ringRepeatPeriod(500)       // Frequency (lower is faster)
       
-      // Auto-rotation
       .controls().autoRotate = true;
       world.controls().autoRotateSpeed = 0.5;
 
-    // API Logic: Fetch Visitor Location
+    // 2. Define our Beacons
+    // We start with a permanent one for Sri Lanka
+    const beacons = [
+      { lat: 6.9271, lng: 79.8612, name: 'Home Base' }
+    ];
+    
+    // Apply the home beacon immediately
+    world.ringsData(beacons);
+
+    // 3. Fetch Visitor Location and add a second Beacon
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
         const { latitude, longitude, city, country_name } = data;
         
-        // Update the text on screen
-        document.querySelector('p').innerHTML = `Hello from <b>${city}, ${country_name}</b>! ✨`;
+        // Update the UI text
+        document.getElementById('status').innerHTML = `Hello from <b>${city}, ${country_name}</b>! ✨`;
 
-        // Add the visitor's location as a ring
-        const visitorData = [{ lat: latitude, lng: longitude }];
-        world.ringsData(visitorData);
+        // Add visitor location to our beacons list
+        beacons.push({ lat: latitude, lng: longitude, name: 'Visitor' });
         
-        // Fly the camera to the visitor's location
+        // Update the globe with all beacons
+        world.ringsData(beacons);
+        
+        // Fly the camera to the new visitor
         setTimeout(() => {
-          world.pointOfView({ lat: latitude, lng: longitude, altitude: 1.5 }, 2000);
-        }, 1000);
+          world.pointOfView({ lat: latitude, lng: longitude, altitude: 1.8 }, 2000);
+        }, 1200);
       })
       .catch(err => {
-        console.log("Location error:", err);
-        // Fallback data if API fails
-        world.ringsData([{ lat: 6.9271, lng: 79.8612 }]); 
+        console.log("Location detection failed, showing default beacons.");
+        document.getElementById('status').innerText = "Welcome to my globe!";
       });
   </script>
 </body>
